@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:test": "bun --env-file=.env.test run vite build --mode test",
+    "test": "bun --env-file=.env.test run vite build --mode test",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -21,7 +23,8 @@
     "react-dom": "^19.2.0",
     "react-helmet-async": "^2.0.5",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "zustand": "^5.0.10"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

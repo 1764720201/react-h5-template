@@ -29,7 +29,13 @@
 - **[TanStack Query (React Query) 5.90.17](https://tanstack.com/query/latest)** - 强大的数据同步库
   - 已配置 QueryClient 和 QueryClientProvider
   - 提供数据缓存、同步、更新等功能
-- **[axios](https://axios-http.com/)** - 基于 Promise 的 HTTP 客户端（待安装）
+- **[Zustand 5.0.10](https://zustand-demo.pmnd.rs/)** - 轻量级状态管理库
+  - 简单易用的 API，无需 Provider
+  - 支持中间件（persist、devtools 等）
+  - 已配置基础的 appStore，包含用户信息、主题、语言等状态
+- **[axios 1.13.2](https://axios-http.com/)** - 基于 Promise 的 HTTP 客户端
+  - 已封装请求拦截器和响应拦截器
+  - 支持统一错误处理和 token 管理
 
 ### 开发工具
 
@@ -55,6 +61,7 @@
   "@radix-ui/react-slot": "^1.2.4",
   "@tailwindcss/vite": "^4.1.18",
   "@tanstack/react-query": "^5.90.17",
+  "axios": "^1.13.2",
   "class-variance-authority": "^0.7.1",
   "clsx": "^2.1.1",
   "lucide-react": "^0.562.0",
@@ -62,7 +69,8 @@
   "react-dom": "^19.2.0",
   "react-helmet-async": "^2.0.5",
   "tailwind-merge": "^3.4.0",
-  "tailwindcss": "^4.1.18"
+  "tailwindcss": "^4.1.18",
+  "zustand": "^5.0.10"
 }
 ```
 
@@ -129,6 +137,24 @@ npm run preview
 npm run lint
 ```
 
+### 测试环境构建
+
+使用测试环境变量构建项目：
+
+```bash
+# 使用 bun（推荐）
+bun test
+
+# 或使用 npm/yarn/pnpm
+npm run test
+```
+
+测试环境构建会：
+
+- 自动加载 `.env.test` 文件中的环境变量
+- 输出到 `dist-test` 目录
+- 使用测试环境的 API 地址等配置
+
 ## 📁 项目结构
 
 ```
@@ -137,17 +163,28 @@ react-h5-template/
 ├── src/
 │   ├── assets/            # 资源文件
 │   ├── components/         # 组件目录
-│   │   └── ui/            # shadcn/ui 组件
+│   │   ├── ui/            # shadcn/ui 组件
+│   │   └── ErrorBoundary.tsx  # 错误边界组件
+│   ├── hooks/             # 自定义 Hooks
+│   │   ├── useDebounce.ts # 防抖 Hook
+│   │   └── index.ts       # Hooks 导出
 │   ├── lib/               # 工具函数
+│   │   ├── request.ts     # axios 请求封装
 │   │   └── utils.ts       # 通用工具函数
+│   ├── store/             # 状态管理
+│   │   ├── appStore.ts    # 应用状态 store
+│   │   └── index.ts       # Store 导出
 │   ├── utils/             # 其他工具
-│   ├── App.tsx            # 根组件
+│   │   └── api.ts         # API 接口封装
+│   ├── App.tsx            # 根组件（包含所有库的使用示例）
 │   ├── App.css            # 应用样式
 │   ├── index.css          # 全局样式（Tailwind CSS）
 │   └── main.tsx           # 应用入口
 ├── components.json         # shadcn/ui 配置文件
 ├── vite.config.ts         # Vite 配置
 ├── tsconfig.json          # TypeScript 配置
+├── .env.example           # 环境变量示例文件
+├── .env.test              # 测试环境变量（需要创建）
 └── package.json           # 项目依赖
 ```
 
@@ -161,6 +198,8 @@ react-h5-template/
 - `@/components` → `src/components`
 - `@/components/ui` → `src/components/ui`
 - `@/lib` → `src/lib`
+- `@/store` → `src/store`
+- `@/utils` → `src/utils`
 - `@/hooks` → `src/hooks`
 
 ### shadcn/ui 配置
@@ -173,6 +212,79 @@ react-h5-template/
 ### React Query 配置
 
 已在 `src/main.tsx` 中配置 QueryClientProvider，可直接使用 React Query hooks。
+
+### Zustand 状态管理
+
+已创建基础的 `appStore`，包含以下功能：
+
+- **用户信息管理**: `user`、`setUser`、`clearUser`
+- **主题设置**: `theme`、`setTheme`（支持 light/dark/system）
+- **加载状态**: `loading`、`setLoading`
+- **语言设置**: `locale`、`setLocale`
+- **状态重置**: `reset`
+
+使用示例：
+
+```typescript
+import { useAppStore } from "@/store";
+
+function MyComponent() {
+  // 获取状态和 actions
+  const { user, theme, setUser, setTheme } = useAppStore();
+
+  // 或者只订阅需要的部分（性能优化）
+  const user = useAppStore((state) => state.user);
+  const setUser = useAppStore((state) => state.setUser);
+
+  return (
+    <div>
+      <p>当前用户: {user?.name}</p>
+      <button onClick={() => setTheme("dark")}>切换主题</button>
+    </div>
+  );
+}
+```
+
+**持久化**: appStore 已配置 `persist` 中间件，用户信息、主题和语言设置会自动保存到 localStorage。
+
+### 环境变量配置
+
+项目支持多环境配置，通过 `.env` 文件管理：
+
+- `.env` - 本地开发环境（会被 git 忽略）
+- `.env.test` - 测试环境
+- `.env.production` - 生产环境（会被 git 忽略）
+- `.env.example` - 环境变量示例文件
+
+环境变量必须以 `VITE_` 开头才能在代码中访问：
+
+```typescript
+// 在代码中使用
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+```
+
+### H5 移动端优化
+
+模板已针对移动端 H5 应用进行了优化：
+
+- **Viewport 配置**: 已优化移动端视口设置，禁用缩放
+- **错误边界**: 已添加 `ErrorBoundary` 组件，捕获并优雅处理错误
+- **自定义 Hooks**: 提供了常用 Hooks（如 `useDebounce`）
+- **响应式设计**: 使用 Tailwind CSS 实现移动端适配
+
+### App.tsx 示例
+
+`src/App.tsx` 包含了所有第三方库的完整使用示例，包括：
+
+- ✅ React Query (useQuery, useMutation)
+- ✅ Zustand 状态管理
+- ✅ Axios 请求封装
+- ✅ react-helmet-async SEO 管理
+- ✅ lucide-react 图标使用
+- ✅ shadcn/ui 组件展示
+- ✅ Tailwind CSS 样式示例
+
+可以直接参考 `App.tsx` 了解如何使用各个库。
 
 ## 🔧 React Compiler
 
