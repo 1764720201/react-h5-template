@@ -36,6 +36,9 @@
 - **[axios 1.13.2](https://axios-http.com/)** - 基于 Promise 的 HTTP 客户端
   - 已封装请求拦截器和响应拦截器
   - 支持统一错误处理和 token 管理
+- **[react-router-dom 7.12.0](https://reactrouter.com/)** - 官方路由库
+  - 已配置 BrowserRouter
+  - 包含路由示例（首页、关于页、404 页面）
 
 ### 开发工具
 
@@ -68,6 +71,7 @@
   "react": "^19.2.0",
   "react-dom": "^19.2.0",
   "react-helmet-async": "^2.0.5",
+  "react-router-dom": "^7.12.0",
   "tailwind-merge": "^3.4.0",
   "tailwindcss": "^4.1.18",
   "zustand": "^5.0.10"
@@ -171,12 +175,18 @@ react-h5-template/
 │   ├── lib/               # 工具函数
 │   │   ├── request.ts     # axios 请求封装
 │   │   └── utils.ts       # 通用工具函数
+│   ├── pages/             # 页面组件
+│   │   ├── Home.tsx       # 首页（包含所有库的使用示例）
+│   │   ├── About.tsx      # 关于页
+│   │   └── NotFound.tsx   # 404 页面
+│   ├── router/            # 路由配置
+│   │   └── index.tsx      # 路由定义
 │   ├── store/             # 状态管理
 │   │   ├── appStore.ts    # 应用状态 store
 │   │   └── index.ts       # Store 导出
 │   ├── utils/             # 其他工具
 │   │   └── api.ts         # API 接口封装
-│   ├── App.tsx            # 根组件（包含所有库的使用示例）
+│   ├── App.tsx            # 根组件（已迁移到路由系统）
 │   ├── App.css            # 应用样式
 │   ├── index.css          # 全局样式（Tailwind CSS）
 │   └── main.tsx           # 应用入口
@@ -272,10 +282,48 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 - **自定义 Hooks**: 提供了常用 Hooks（如 `useDebounce`）
 - **响应式设计**: 使用 Tailwind CSS 实现移动端适配
 
-### App.tsx 示例
+### 路由配置
 
-`src/App.tsx` 包含了所有第三方库的完整使用示例，包括：
+项目使用 `react-router-dom` 进行路由管理，路由配置在 `src/router/index.tsx`：
 
+```typescript
+import { createBrowserRouter } from "react-router-dom";
+import Home from "@/pages/Home";
+import About from "@/pages/About";
+import NotFound from "@/pages/NotFound";
+
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Home />,
+  },
+  {
+    path: "/about",
+    element: <About />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
+]);
+```
+
+**已包含的页面**：
+
+- `/` - 首页（包含所有库的使用示例）
+- `/about` - 关于页
+- `*` - 404 页面
+
+**添加新路由**：
+
+1. 在 `src/pages/` 创建新页面组件
+2. 在 `src/router/index.tsx` 中添加路由配置
+
+### 页面示例
+
+`src/pages/Home.tsx` 包含了所有第三方库的完整使用示例，包括：
+
+- ✅ React Router (路由导航)
 - ✅ React Query (useQuery, useMutation)
 - ✅ Zustand 状态管理
 - ✅ Axios 请求封装
@@ -284,7 +332,7 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL;
 - ✅ shadcn/ui 组件展示
 - ✅ Tailwind CSS 样式示例
 
-可以直接参考 `App.tsx` 了解如何使用各个库。
+可以直接参考 `src/pages/Home.tsx` 了解如何使用各个库。
 
 ## 🔧 React Compiler
 
