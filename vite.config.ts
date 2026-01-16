@@ -7,7 +7,7 @@ import path from 'path'
 export default defineConfig(({ mode }) => {
   // 加载环境变量
   const env = loadEnv(mode, process.cwd(), '')
-  
+
   return {
     plugins: [
       react({

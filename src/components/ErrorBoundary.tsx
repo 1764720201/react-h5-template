@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {this.state.error?.message || "应用遇到了一个错误"}
             </p>
             <Button onClick={this.handleReset}>重试</Button>
-            {process.env.NODE_ENV === "development" && this.state.error && (
+            {import.meta.env.MODE === "development" && this.state.error && (
               <details className="mt-4 text-left">
                 <summary className="cursor-pointer text-sm text-muted-foreground">
                   错误详情
