@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-test
+*.lock
+*.log
+.DS_Store
+coverage
+.vscode
+.idea
